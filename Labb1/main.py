@@ -60,16 +60,16 @@ def allMoves(board, lastVisitedNode):
         state = copy.copy(board)
         if(n == 0):
             state = moveRight(state)
-            h1 = evaluateH(state)
+            h = evaluateH(state)
         if(n == 1):
             state = moveDown(state)
-            h1 = evaluateH(state)
+            h = evaluateH(state)
         if(n == 2):
             state = moveLeft(state)
-            h1 = evaluateH(state)
+            h = evaluateH(state)
         if(n == 3):
             state = moveUp(state)
-            h1 = evaluateH(state)
+            h = evaluateH(state)
         s = ''.join(str(x) for x in state)
         if s in expandedNodes:
             set = False
@@ -80,20 +80,43 @@ def allMoves(board, lastVisitedNode):
                 set = False
                 break """
         if(set):
-            movesQ.put((h1, state))
+            movesQ.put((h, state))
+
+def calculateManhattan(board):
+    positions = [[1,1], [2,1], [3,1], [1,2], [2,2], [3,2], [1,3], [2,3], [3,3]]
+    h = 0
+    for n in board:
+        indexOfCurrent = board.index(n)
+        statePos = positions[indexOfCurrent]
+        if(n == 0):
+            goalPos = positions[8]
+        else:
+            goalPos = positions[n-1]
+        
+        y_dist = abs(statePos[1] - goalPos[1])
+        x_dist = abs(statePos[0] - goalPos[0])
+        h = h+y_dist+x_dist
+    return h
 
 def evaluateH(board):
     h1 = 0; 
     for n in range(len(board)):
-        if(board[n] != n):
+        if(n == 8 and board[8] != 0):
+            #print("pkus")
             h1 = h1+1
-    return h1
+        elif(board[n] != n+1 and n != 8):
+            h1 = h1+1
+    
+    h2 = calculateManhattan(board)
+    return h2
+
+
     
 
 def main():   
 
-    board = [5,8,6,3,4,7,0,1,2]
-    random.shuffle(board)
+    board = [8,6,7,2,5,4,3,0,1]
+    #random.shuffle(board)
     print(board)
     # Upp = -3 index
     # Vänster = -1 index
@@ -108,9 +131,7 @@ def main():
     while(True):
         numberOfIterations = numberOfIterations+1
         node = movesQ.get()
-        
         if(node[0] == 0):
-            
             break
         allMoves(node[1], expandedNodes)
         s = ''.join(str(x) for x in node[1])
@@ -125,8 +146,6 @@ def main():
     elapsedTime = end_time-start_time
     elapsedTime= round(elapsedTime,4)
     print("Elapsed time: ",elapsedTime,"s")
-    
-
     
 
 main()
