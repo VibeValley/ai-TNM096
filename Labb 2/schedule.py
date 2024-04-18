@@ -40,7 +40,7 @@ def getConflicts(courses):
 
         if(first == second or first == third or second == third):
             if((first == "5" and second == "5") or (second == "5" and third == "5") or (first == "5" and third == "5")):
-                continue
+                n = n
                 #print("hej")
             else:
                 conflicts = np.append(conflicts, n)
@@ -54,23 +54,6 @@ def randomizeOrder(courses):
     newArray = np.random.shuffle(courses)
     return newArray
 
-def min_conflicts_ver1(csp, maxNumber=10000):
-    randomizeOrder(csp)
-    conflictIndexes = getConflicts(csp)
-    conflictArray = np.array([])
-    
-    for conflictIndex in conflictIndexes:
-        conflictArray = np.append(conflictArray,csp[conflictIndex])
-        conflictArray = np.append(conflictArray,csp[conflictIndex+1])
-        conflictArray = np.append(conflictArray,csp[conflictIndex+2])
-        csp[conflictIndex] = "     "
-        csp[conflictIndex+1] = "     "
-        csp[conflictIndex+2] = "     "
-    
-    #for i in range(maxNumber):
-        #if()
-
-    return conflictArray
 
 def min_conflicts(courses,randIndex, conflicts):
     startOfRowCourse = courses[randIndex]
@@ -79,14 +62,9 @@ def min_conflicts(courses,randIndex, conflicts):
     minIndex = np.array([[10000,10000]])
     minIndexConflict = 1000
     
-
-    """ if(courseNumber == " "):
-        print("nu valdes en blank av random")
-        return randIndex """
-    
     for i in range(len(courses)):
         courseNumberOther = courses[i][2]
-        #Prevent same row
+        #Prevent same row and same number
         if(courseNumber != courseNumberOther):
             neighbours = ["", ""]
             col = i % 3
@@ -130,11 +108,17 @@ def min_conflicts(courses,randIndex, conflicts):
 
 def main():
     courses = loadCourses()
+    print("          Initial state: ")
+    printSchedule(courses)
+    print("\n")
     conflicts = getConflicts(courses)
     randomizeOrder(courses)
+    print("       Randomized state: ")
+    printSchedule(courses)
+    print("\n")
     #print(conflicts)
     n = 0
-    while(len(conflicts) > 0 and n < 10000):
+    while(len(conflicts) > 0 and n < 1000):
         n = n + 1
 
         randConflict = np.random.choice(conflicts)
@@ -144,16 +128,21 @@ def main():
         placeholder = copy.copy(courses[randConflict])
         courses[randConflict] = copy.copy(courses[minConflictIndex])
         courses[minConflictIndex] = placeholder
+
+        #--------PRINT EVERY STEP------------
+        """ printSchedule(courses)
+        print("\n") """
+        
         conflicts = getConflicts(courses)
-        np.random.shuffle(conflicts)
+        np.random.shuffle(conflicts) # So it wont choose the same again
 
-    print(conflicts)
+    #print(conflicts)
+    print("          Final state: ")
     printSchedule(courses)
+    print("\n")
+    print("Number of swaps: ", n)
+    print("Conflict array: ",conflicts)
 
-    """ conflictArray = min_conflicts(courses)
-    printSchedule(courses)
-    print(conflictArray)
- """
 
 
 main()
