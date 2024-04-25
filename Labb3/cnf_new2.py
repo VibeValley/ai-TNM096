@@ -60,6 +60,17 @@ class Clauses:
     def remove_negative(self, item):
         self.n.remove(item)
 
+    def getWholeSet(self):
+        new_set = set()
+
+        for i in self.p:
+            new_set.add(i)
+        for i in self.n:
+            new_set.add(i)
+        
+        return new_set
+
+
 def positive(A):
     temp = []
     for literal in A:
@@ -208,8 +219,14 @@ hejsan = set()
 p_set = set((1,2))
 p_set2 = set((1,2,3))
 n_set = set((3,-4))
-hejsan.add(Clauses(p_set,n_set))
-hejsan.add(Clauses(p_set2,n_set))
+hejsan.add(Clauses({3},set((-1,-2))))
+hejsan.add(Clauses({5},set((-2,-3))))
+hejsan.add(Clauses({2},{-5}))
+hejsan.add(Clauses({},set((-5,-3))))
+hejsan.add(Clauses({5}, {}))
+hejsan.add(Clauses({1,5,4}, {}))
+
+
 
 print(hejsan)
 
