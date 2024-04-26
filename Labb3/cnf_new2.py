@@ -9,9 +9,6 @@ class Clauses:
     def __eq__(self, other):
         return self.p == other.p and self.n == other.n
 
-    def __lt__(self, other):
-        return len(self.p) + len(self.n) < len(other.p) + len(other.n)
-
     def __hash__(self):
         p_hashable = frozenset(self.p) if isinstance(self.p, (set, list, tuple)) else self.p
         n_hashable = frozenset(self.n) if isinstance(self.n, (set, list, tuple)) else self.n
@@ -25,208 +22,110 @@ class Clauses:
         for item in self.p:
             listed.append(item)
         for item in self.n:
-            listed.append(item)
+            listed.append(-item)
 
         return f"{listed}"
 
     def __contains__(self, item):
         return item in self.p or item in self.n
 
-    def __len__(self):
-        return len(self.p) + len(self.n)
-
-    def __iter__(self):
-        yield from self.p
-        yield from self.n
-
-    def __sub__(self, other):
-        return Clauses(self.p - other.p, self.n - other.n)
-
-    def __or__(self, other):
-        return Clauses(self.p | other.p, self.n | other.n)
-
-    def __and__(self, other):
-        return Clauses(self.p & other.p, self.n & other.n)
-
-    def add_positive(self, item):
-        self.p.add(item)
-
-    def add_negative(self, item):
-        self.n.add(item)
-
-    def remove_positive(self, item):
-        self.p.remove(item)
-
-    def remove_negative(self, item):
-        self.n.remove(item)
-
-    def getWholeSet(self):
-        new_set = set()
-
-        for i in self.p:
-            new_set.add(i)
-        for i in self.n:
-            new_set.add(i)
-        
-        return new_set
-
-
-def positive(A):
-    temp = []
-    for literal in A:
-        if(literal > 0):
-            temp.append(literal)
-    
-    temp2 = tuple(temp)
-    return temp2
-
-def makeNegative(A):
-    temp = []
-    for tuple1 in A:
-        for i in tuple1:
-            temp.append(-i)
-    
-    temp2 = tuple(temp)
-    return temp2
-
-def negative(A):
-    temp = []
-    for literal in A:
-        if(literal < 0):
-            temp.append(-literal)
-    
-    temp2 = tuple(temp)
-    return temp2
 
                     
 
 
-def Resolution(A, B):
-    C = set()
-    A = set(A)
-    B = set(B)
-    
+def Resolution(A_copy, B_copy):
+    A = copy.deepcopy(A_copy)
+    B = copy.deepcopy(B_copy)
 
-    Ap = set()
-    An = set()
-    Bp = set()
-    Bn = set()
-    Ap.add(positive(A))
-    An.add(negative(A))
-    Bp.add(positive(B))
-    Bn.add(negative(B))
-    """ print('Ap:', Ap)
-    print('An:', An)
-    print('Bp:', Bp)
-    print('Bn:', Bn) """
-
-    Ap_i_Bn = Ap.intersection(Bn)
-    An_i_Bp = An.intersection(Bp)
+    Ap_i_Bn = A.p.intersection(B.n)
+    An_i_Bp = A.n.intersection(B.p)
 
     if not Ap_i_Bn and not An_i_Bp:
         return False
     
     if Ap_i_Bn:
-        a = random.choice(tuple(Ap_i_Bn))
-        Ap.remove(a)
-        Bn.remove(a)
+        a = random.choice(list(Ap_i_Bn))
+        A.p.remove(a)
+        B.n.remove(a)
     else:
-        a = random.choice(tuple(An_i_Bp))
-        An.remove(a)
-        Bp.remove(a)
+        a = random.choice(list(An_i_Bp))
+        A.n.remove(a)
+        B.p.remove(a)
     
-    Cp = Bp.union(Ap)
-    Cn = An.union(Bn)
-    """ print(Cn)
-    print(Cp)
-    print(Cp.intersection(Cn)) """
-    if Cp.intersection(Cn):
+    C = Clauses(B.p.union(A.p),A.n.union(B.n))
+
+    if C.p.intersection(C.n):
         return False
-    Cn2 = set()
-    Cn2.add(makeNegative(Cn))
  
-    C = Cp.union(Cn2)
     return C
 
 def Incorporate(S, KB):
-    for clause in S:
+    for clause in copy.deepcopy(S):
         KB = Incorporate_Clause(clause, KB)
         #KB.add(tuple(clause))
     return KB
 
 def Incorporate_Clause(A, KB):
-    a_set = set()
-    a_set.add(A)
     
     
-    for clauseB in KB:
-        b_set = set()
-        b_set.add(clauseB)
-        if b_set == a_set or b_set.issubset(a_set):
-            print('in 1st if')
+    for B in copy.deepcopy(KB):
+        if B.p.issubset(A.p) and B.n.issubset(A.n):
             return KB
-    for clauseB in KB:
-        b_set = set()
-        b_set.add(clauseB)
-        if b_set == a_set or a_set.issubset(b_set):
-            print('in 2st if')
-            KB = KB - b_set
+    for B in copy.deepcopy(KB):
+        if A.p.issubset(B.p) and A.n.issubset(B.n):
+            KB.discard(B)
 
     
-    KB = KB.union(a_set)
+    KB = KB.union({A})
     return KB
 
 def Solver(KB):
     K = set()
-    print('heres first incorporate')
     KB = Incorporate(KB, K)
-    KB_list = list(KB)
-    print('KB_list:', KB_list)
     k = 0
-    while k < 1:
+    while True:
         k +=1
         S = set()
-        KB_old = copy.copy(KB_list)
-        for i in range(len(KB_list)):
+        KB_list = list(KB)
+        KB_old = copy.deepcopy(KB)
+        for i in range(len(KB_list)-1):
             for j in range(i + 1, len(KB_list)):
                 C = Resolution(KB_list[i], KB_list[j])
-                if C:
-                    print('Here we have C:', C)
-                    S = S.union(C) #Måste vi inte kolla ifall ensamma objekt redan finns inlagda oavsett minus och plus. Det kan ju inte vara -sun och sun liksom
-                    print('Here we have S:', S)
+                if C :
+                    S = S.union({C}) 
         if not S:
-            return KB_list
-        print('heres second incorporate')
+            return KB
         KB = Incorporate(S, KB)
-        KB_list = list(KB)
-        if KB_old == KB_list:
-            return KB_list
-
-initial_clauses = set()
-initial_clauses.add(tuple([-1,-2,3]))
-initial_clauses.add(tuple([-2,3,5]))
-initial_clauses.add(tuple([-5,2]))
-initial_clauses.add(tuple([-5,-3]))
-initial_clauses.add(tuple([5]))
-initial_clauses.add(tuple([1,5,4]))
-
-print(initial_clauses)
-
-#result = Solver(initial_clauses)
-#print('Final Knowledge Base:', result)
-
-hejsan = set()
-p_set = set((1,2))
-p_set2 = set((1,2,3))
-n_set = set((3,-4))
-hejsan.add(Clauses({3},set((-1,-2))))
-hejsan.add(Clauses({5},set((-2,-3))))
-hejsan.add(Clauses({2},{-5}))
-hejsan.add(Clauses({},set((-5,-3))))
-hejsan.add(Clauses({5}, {}))
-hejsan.add(Clauses({1,5,4}, {}))
+        if KB_old == KB:
+            break
+    return KB
 
 
+# sun = 1
+# money = 2
+# ice = 3
+# cry = 4
+# movie = 5
+task1 = set()
+task1.add(Clauses({3},set((1,2))))
+task1.add(Clauses({5,3},{2}))
+task1.add(Clauses({2},{5}))
+task1.add(Clauses({},set((5,3))))
+task1.add(Clauses({5}, {}))
+task1.add(Clauses({1,5,4}, {}))
 
-print(hejsan)
+task2 = set()
+task2.add(Clauses({1,2,3}, {}))
+task2.add(Clauses({1}, {3}))
+task2.add(Clauses({1,3}, {2}))
+
+# A -C
+# A B C
+# -B
+
+
+print('Start Set:', task2)
+result = Solver(task2)
+print('Final Knowledge Base:', result)
+
 
