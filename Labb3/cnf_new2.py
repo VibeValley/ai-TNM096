@@ -92,7 +92,8 @@ def Solver(KB):
             for j in range(i + 1, len(KB_list)):
                 C = Resolution(KB_list[i], KB_list[j])
                 if C :
-                    S = S.union({C}) 
+                    S = S.union({C})
+                    print(S)
         if not S:
             return KB
         KB = Incorporate(S, KB)
@@ -117,11 +118,12 @@ task1.add(Clauses({1,5,4}, {}))
 task2 = set()
 task2.add(Clauses({1,2,3}, {}))
 task2.add(Clauses({1}, {3}))
-task2.add(Clauses({1,3}, {2}))
+task2.add(Clauses({1}, {2}))
+
 
 # A -C
 # A B C
-# -B
+# -B A
 
 
 print('Start Set:', task2)
