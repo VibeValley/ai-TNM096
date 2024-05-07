@@ -1,5 +1,5 @@
 act(go(X,Y),
-    [at(shakey, X), on(shakey,floor), corridor(X,Y)],
+    [at(shakey, X), on(shakey,floor), connect(X,Y)],
     [at(shakey,X)],
     [at(shakey,Y)]
 ).
@@ -11,9 +11,9 @@ act(push(B,X,Y),
 ).
 
 act(climbUp(B),
-    [on(shakey,floor),at(shakey,X), at(B,X)], %precondition
-    [on(shakey,floor)], % delete from precondition
-    [on(shakey,B)] % adding to condition
+    [on(shakey,floor),at(shakey,X), at(B,X)], 
+    [on(shakey,floor)], 
+    [on(shakey,B)] 
 ).
 
 act(climbDown(B),
@@ -40,24 +40,27 @@ goal_state( [at(box2, room2) ]).
 
 initial_state(
     [
-
-        corridor(room1, hallway),
-        corridor(hallway, room1),
-        corridor(room2, hallway),
-        corridor(hallway, room2),
-        corridor(room3, hallway),
-        corridor(hallway, room3),
-        corridor(room4, hallway),
-        corridor(hallway, room4),
+        %All the rooms are connected within the hallway
+        connect(room1, hallway),
+        connect(hallway, room1),
+        connect(room2, hallway),
+        connect(hallway, room2),
+        connect(room3, hallway),
+        connect(hallway, room3),
+        connect(room4, hallway),
+        connect(hallway, room4),
         
+        %Declaring the positions of the boxes
         at(box1, room1),
         at(box2, room1),
         at(box3, room1),
         at(box4, room1),
 
+        %Declaring shakey state
         at(shakey, room3),
         on(shakey, floor),
         
+        %Declaring the status of the lights
         light(room1, on),
         light(room2, off),
         light(room3, off),
