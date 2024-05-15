@@ -1,0 +1,46 @@
+// Bayesian network 
+network "JohnMaryCall" { //5 variables and 5 probability distributions
+}
+variable  "Burglary" { //2 values
+	type discrete[2] {  "False"  "True" };
+	property "observed True" ;
+	property "position = (145, 114)" ;
+}
+variable  "Earthquake" { //2 values
+	type discrete[2] {  "False"  "True" };
+	property "position = (351, 110)" ;
+}
+variable  "Alarm" { //2 values
+	type discrete[2] {  "False"  "True" };
+	property "position = (253, 224)" ;
+}
+variable  "JohnCalls" { //2 values
+	type discrete[2] {  "False"  "True" };
+	property "position = (156, 343)" ;
+}
+variable  "MaryCalls" { //2 values
+	type discrete[2] {  "False"  "True" };
+	property "position = (344, 341)" ;
+}
+probability (  "Burglary" ) { //1 variable(s) and 2 values
+	table 
+		0.999	// p(False | evidence )
+		0.001; 	// p(True | evidence );
+}
+probability (  "Earthquake" ) { //1 variable(s) and 2 values
+	table 
+		0.998	// p(False | evidence )
+		0.002; 	// p(True | evidence );
+}
+probability (  "Alarm"  "Burglary"  "Earthquake" ) { //3 variable(s) and 8 values
+	table 
+		 0.999 0.71 0.06 0.05 0.001 0.29 0.94 0.95;
+}
+probability (  "JohnCalls"  "Alarm" ) { //2 variable(s) and 4 values
+	table 
+		 0.95 0.1 0.05 0.9;
+}
+probability (  "MaryCalls"  "Alarm" ) { //2 variable(s) and 4 values
+	table 
+		 0.99 0.3 0.01 0.7;
+}
