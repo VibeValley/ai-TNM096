@@ -11,7 +11,7 @@ act(push(B,X,Y),
 ).
 
 act(climbUp(B),
-    [on(shakey,floor),at(shakey,X), at(B,X)], 
+    [on(shakey,floor),at(shakey,X), at(B,X), climbable(B, true)], 
     [on(shakey,floor)], 
     [on(shakey,B)] 
 ).
@@ -35,7 +35,8 @@ act(turnOff(L),
 ).
 
 %goal_state( [at(shakey, room1) ]).
-%goal_state( [lightoff(room1) ]).
+%goal_state( [light(room1, off) ]).
+%goal_state( [at(box2, room2),light(room1, off),at(shakey, room1) ]).
 goal_state( [at(box2, room2) ]).
 
 initial_state(
@@ -55,10 +56,15 @@ initial_state(
         at(box2, room1),
         at(box3, room1),
         at(box4, room1),
+        climbable(box1, true),
+        climbable(box2, true),
+        climbable(box3, true),
+        climbable(box4, true),
 
         %Declaring shakey state
         at(shakey, room3),
         on(shakey, floor),
+        climbable(shakey, false),
         
         %Declaring the status of the lights
         light(room1, on),
